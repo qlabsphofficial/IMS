@@ -15,8 +15,8 @@ const CommissaryAnalyis = () => {
  
     
     async function retrieveCommissaryCritical(){
-        const data = await fetch('http://127.0.0.1:8000/retrieve_commissary_critical');
-        //const data = await fetch('https://ims-be-j66p.onrender.com/retrieve_commissary_critical');
+        // const data = await fetch('http://127.0.0.1:8000/retrieve_commissary_critical');
+        const data = await fetch('https://ims-be-j66p.onrender.com/retrieve_commissary_critical');
         const response = await data.json();
         
         setCritStock(response.items);

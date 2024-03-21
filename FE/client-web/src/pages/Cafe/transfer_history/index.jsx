@@ -79,8 +79,8 @@ const TransferHistoryPage = () => {
   }
 
   async function retrieveInventoryItems() {
-    const data = await fetch('http://127.0.0.1:8000/all_transactions');
-    //const data = await fetch('https://ims-be-j66p.onrender.com/all_transactions');
+    // const data = await fetch('http://127.0.0.1:8000/all_transactions');
+    const data = await fetch('https://ims-be-j66p.onrender.com/all_transactions');
     const response = await data.json();
   
     console.log(response.transactions);
@@ -100,8 +100,8 @@ const TransferHistoryPage = () => {
       headers: { 'Content-Type': 'application/json' }
     }
 
-     const response = await fetch(`http://127.0.0.1:8000/delete_transaction/${transaction_id}`, requestOptions);
-    //const response = await fetch(`https://ims-be-j66p.onrender.com/delete_transaction/${transaction_id}`, requestOptions);
+    //  const response = await fetch(`http://127.0.0.1:8000/delete_transaction/${transaction_id}`, requestOptions);
+    const response = await fetch(`https://ims-be-j66p.onrender.com/delete_transaction/${transaction_id}`, requestOptions);
     const data = await response.json();
 
     console.log(data.response);
@@ -116,8 +116,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-     const response = await fetch(`http://127.0.0.1:8000/update_transaction/${modId}`, requestOptions);
-    //const response = await fetch(`https://ims-be-j66p.onrender.com/update_transaction/${modId}`, requestOptions);
+    //  const response = await fetch(`http://127.0.0.1:8000/update_transaction/${modId}`, requestOptions);
+    const response = await fetch(`https://ims-be-j66p.onrender.com/update_transaction/${modId}`, requestOptions);
     const data = await response.json();
 
     console.log(data.response);
@@ -212,8 +212,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-     const data = await fetch('http://127.0.0.1:8000/search_transfer_requests', requestOptions);
-    //const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+    //  const data = await fetch('http://127.0.0.1:8000/search_transfer_requests', requestOptions);
+    const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
     const response = await data.json();
 
     setTransferData(response.transactions);
@@ -228,8 +228,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-    const data = await fetch(`http://127.0.0.1:8000/substitute_approval/${transaction_id}`, requestOptions);
-    // const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+    // const data = await fetch(`http://127.0.0.1:8000/substitute_approval/${transaction_id}`, requestOptions);
+    const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
     const response = await data.json();
     retrieveInventoryItems();
   }
@@ -250,8 +250,8 @@ const TransferHistoryPage = () => {
     }
 
     try {
-         const response = await fetch('http://127.0.0.1:8000/retrieve_transaction_summary', requestOptions);
-        //const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
+        //  const response = await fetch('http://127.0.0.1:8000/retrieve_transaction_summary', requestOptions);
+        const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
         const blob = await response.blob();
 
         const url = window.URL.createObjectURL(new Blob([blob]));
@@ -273,7 +273,7 @@ const TransferHistoryPage = () => {
 
   async function requestSpoilageReportData(){
     try {
-        const response = await fetch('http://127.0.0.1:8000/retrieve_spoilage_report_summary');
+        const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_spoilage_report_summary');
         //const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
         const blob = await response.blob();
 

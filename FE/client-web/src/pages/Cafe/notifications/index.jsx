@@ -23,11 +23,11 @@ const CafeNotifications = () => {
     let username = JSON.parse(localStorage.getItem('user_data'));
     console.log(username);
 
-    const data = await fetch(`http://127.0.0.1:8000/retrieve_notifications/${username}`);
+    const data = await fetch(`https://ims-be-j66p.onrender.com/retrieve_notifications/${username}`);
     // const data = await fetch('https://ims-be-j66p.onrender.com/all_transactions');
     const response = await data.json();
 
-    const processed_data = await fetch(`http://127.0.0.1:8000/set_notifs_as_seen/${username}`);
+    const processed_data = await fetch(`https://ims-be-j66p.onrender.com/set_notifs_as_seen/${username}`);
     const processed_response = await processed_data.json();
     
     setNotifications(response.notifications);

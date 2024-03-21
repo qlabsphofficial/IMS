@@ -48,8 +48,8 @@ const SignIn = () => {
       }),
     };
 
-    const response = await fetch(`http://127.0.0.1:8000/login`, requestOptions);
-    //const response = await fetch(`https://ims-be-j66p.onrender.com/login`, requestOptions);
+    // const response = await fetch(`http://127.0.0.1:8000/login`, requestOptions);
+    const response = await fetch(`https://ims-be-j66p.onrender.com/login`, requestOptions);
     const data = await response.json();
     console.log(data.response);
 
