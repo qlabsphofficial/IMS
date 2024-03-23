@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'ims_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bwnkjwtve8s1pegrh5yg',
+        'NAME': 'b82zrofatykiik92nuqm',
         'USER': 'uac6vogryy6dflvz',
         'PASSWORD': 'mKuKgOIu5jwEHW0CGOsG',
-        'HOST': 'bwnkjwtve8s1pegrh5yg-mysql.services.clever-cloud.com',  # Set to the MySQL server host (usually 'localhost' during development)
-        'PORT': '3306',  # Set to the MySQL server host (usually 'localhost' during development)
+        'HOST': 'b82zrofatykiik92nuqm-mysql.services.clever-cloud.com',  # Set to the MySQL server host (usually 'localhost' during development)
+        'PORT': '21197',  # Set to the MySQL server host (usually 'localhost' during development)
     }
 }
 
