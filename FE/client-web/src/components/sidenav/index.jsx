@@ -17,7 +17,8 @@ function SideNav() {
     let username = JSON.parse(localStorage.getItem('user_data'));
     console.log('Retrieving notifs count...');
 
-    const data = await fetch(`http://127.0.0.1:8000/retrieve_notifications/${username}`);
+    // const data = await fetch(`http://127.0.0.1:8000/retrieve_notifications/${username}`);
+    const data = await fetch(`https://ims-be-j66p.onrender.com/retrieve_notifications/${username}`);
     const response = await data.json();
     console.log(response);
     setNewNotifsCount(response.new_notifs);
