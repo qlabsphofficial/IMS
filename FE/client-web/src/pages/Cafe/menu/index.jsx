@@ -38,6 +38,8 @@ const CafeInventoryPage = () => {
     const location = useLocation();
     const [password, setPassword] = useState('');
 
+    const [errorMessage, setErrorMessage] = useState('');
+
     useEffect(() => {
         // Retrieve password from local storage when the component mounts
         const storedPassword = localStorage.getItem('password');
@@ -252,10 +254,16 @@ const CafeInventoryPage = () => {
         } else {
             // You can show an error message or take other actions
             // Here, I'm just resetting the code
+            setErrorMessage('Incorrect password. Please try again.');
             setCode('');
+            
         }
     };
     
+    const handleCloseModal = () => {
+        setCodeModalVisible(false);
+        setErrorMessage('');
+    };
 
     
 
@@ -444,24 +452,25 @@ const CafeInventoryPage = () => {
             </Modal>
             <Modal
                 open={codeModalVisible}
-                onClose={() => setCodeModalVisible(false)}
+                onClose={handleCloseModal}
                 sx={{ bgcolor: 'background.Paper', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
                 <div className='modal'>
-                    <Typography variant="h5" id="modal-title">Enter Code</Typography>
+                    <Typography variant="h5" id="modal-title">Enter Password</Typography>
                     <TextField
-                        label="Code"
+                        label="Enter Password"
                         type='password'
                         id="modal-input-field"
                         size='small'
                         value={code}
                         onChange={(event) => setCode(event.target.value)}
                     />
+                     {errorMessage && <Typography variant="body1" style={{ color: 'red', marginTop: '10px' }}>{errorMessage}</Typography>}
                     <Box id='modal-buttons-container'>
                         <Button variant='outlined' onClick={handleCodeVerification}>Submit</Button>
-                        <Button variant='outlined' onClick={() => setCodeModalVisible(false)}>Cancel</Button>
+                        <Button variant='outlined' onClick={handleCloseModal}>Cancel</Button>
                     </Box>
                 </div>
             </Modal>

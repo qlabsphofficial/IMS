@@ -60,10 +60,13 @@ const SignIn = () => {
 
       localStorage.setItem('password', password);
 
-      if (data.user_data === 'Cafe' || data.user_data === 'Intern') {
-        navigate('/cafe/analysis');
+      if (data.user_data === 'Cafe') {
+        navigate('/cafe/notifications');
       } else if (data.user_data === 'Commissary') {
         navigate('/commissary/analysis');
+      }
+      else if (data.user_data === 'Intern') {
+        navigate('/cafe/analysis');
       }
     } else {
       setOpenErrorDialog(true);
