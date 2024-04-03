@@ -1,5 +1,5 @@
 import { SidenavData } from './SidenavData';
-import { Box, Paper, TextField, Button, Typography } from '@mui/material';
+import { Avatar, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import "./styles.css";
@@ -42,7 +42,9 @@ function SideNav() {
         <Box id='system-profile'>
           <Typography variant="h5">Cafe Juan</Typography>
 
-          <Box id='profile'></Box>
+          <Box id='profile' sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Avatar sx={{ width: 100, height: 100 }} src="https://github.com/tuungss123/IMS/blob/dev/cafe.jpg?raw=true" alt="Profile Picture" ></Avatar>
+          </Box>
           <Typography variant='h6'>{JSON.parse(localStorage.getItem('user_data'))}</Typography>
         </Box>
 

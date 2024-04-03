@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Pagination, Modal, Select, MenuItem, FormControl, IconButton } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import './styles.css';
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
-import { useLocation } from 'react-router-dom';
+
 
 const CommissaryInventoryPage = () => {
     const [inventoryData, setInventoryData] = useState([]);
@@ -38,7 +34,6 @@ const CommissaryInventoryPage = () => {
     const [codeModalVisible, setCodeModalVisible] = useState(false);
     const [isAddAction, setIsAddAction] = useState(false);
 
-    const location = useLocation();
     const [password, setPassword] = useState('');
 
     const [errorMessage, setErrorMessage] = useState('');
@@ -78,11 +73,12 @@ const CommissaryInventoryPage = () => {
     }
 
     async function retrieveInventoryItems(){
-        // const data = await fetch('http://127.0.0.1:8000/all_items');
         const data = await fetch('https://ims-be-j66p.onrender.com/all_items');
+        //const data = await fetch('https://ims-be-j66p.onrender.com/all_items');
         const response = await data.json();
         
         setInventoryData(response.items);
+        setCurrentPage(1)
     }
 
     const validateAdding = () => {
@@ -125,8 +121,8 @@ const CommissaryInventoryPage = () => {
             })
         }
 
-        // const response = await fetch(`http://127.0.0.1:8000/create_item`, requestOptions);
         const response = await fetch(`https://ims-be-j66p.onrender.com/create_item`, requestOptions);
+        // const response = await fetch(`https://ims-be-j66p.onrender.com/create_item`, requestOptions);
         const data = await response.json();
         
         console.log(data.response);
@@ -147,8 +143,8 @@ const CommissaryInventoryPage = () => {
             })
         }
 
-        // const response = await fetch(`http://127.0.0.1:8000/update_item/${requestedItem}`, requestOptions);
         const response = await fetch(`https://ims-be-j66p.onrender.com/update_item/${requestedItem}`, requestOptions);
+        //const response = await fetch(`https://ims-be-j66p.onrender.com/update_item/${requestedItem}`, requestOptions);
         const data = await response.json();
         
         if (data.response === 'Item Updated'){
@@ -166,8 +162,8 @@ const CommissaryInventoryPage = () => {
             })
         }
 
-        // const data = await fetch('http://127.0.0.1:8000/search_items', requestOptions);
         const data = await fetch('https://ims-be-j66p.onrender.com/search_items', requestOptions);
+        //const data = await fetch('https://ims-be-j66p.onrender.com/search_items', requestOptions);
         const response = await data.json();
         
         setInventoryData(response.items);
@@ -218,6 +214,47 @@ const CommissaryInventoryPage = () => {
         }
     };
 
+    //pagination
+    const [displayedData, setDisplayedData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [itemsPerPage] = useState(10); 
+
+    useEffect(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const slicedData = inventoryData.slice(startIndex, endIndex);
+        setDisplayedData(slicedData);
+    }, [currentPage, inventoryData, itemsPerPage]);    
+    
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };    
+
+
+//Par stock edit
+const [editedParStock, setEditedParStock] = useState(0);
+const [editItemId, setEditItemId] = useState(null);
+
+const handleEditParStock = (itemId, parStock) => {
+    setEditItemId(itemId);
+    setEditedParStock(parStock);
+};
+
+const saveEditedParStock = async () => {
+    const requestOptions = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+            { par_stock: editedParStock }
+            )
+    };
+
+    await fetch(`https://ims-be-j66p.onrender.com/update_item_par_stock/${editItemId}/`, requestOptions);
+ // await fetch('https://ims-be-j66p.onrender.com/update_item_par_stock/${editItemId}/`, requestOptions);
+    retrieveInventoryItems();
+    setEditItemId(null);
+}
+
     return (
         <Box>
             <Typography variant='h5'>Commissary Inventory</Typography>
@@ -235,6 +272,11 @@ const CommissaryInventoryPage = () => {
                             <TableCell align="center" className='table-header'>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     Item Name
+                                </div>
+                            </TableCell>
+                            <TableCell align="center" className='table-header'>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    Par Stock
                                 </div>
                             </TableCell>
                             <TableCell align="center" className='table-header'>
@@ -257,11 +299,29 @@ const CommissaryInventoryPage = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {inventoryData.map((item) => (
+                        {displayedData.map((item) => (
                             <TableRow key={item.id}>
                                 <TableCell align="center" component="th" scope="row">
                                     {item.item_name}
                                 </TableCell>
+                                <TableCell component="th" align='center' scope="row">
+                                {editItemId === item.id ? (
+                                    <TextField 
+                                        type='number' 
+                                        value={editedParStock} 
+                                        onChange={(e) => setEditedParStock(e.target.value)} 
+                                        onBlur={saveEditedParStock}
+                                    />
+                                ) : (
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Typography variant='body1'>{item.par_stock}</Typography>
+                                        <IconButton onClick={() => handleEditParStock(item.id, item.par_stock)}>
+                                            <EditIcon fontSize="small"/>
+                                        </IconButton>
+                                    </div>
+                                )}
+                            </TableCell>
+
                                 <TableCell align="center" component="th" scope="row">
                                     {item.category}
                                 </TableCell>
@@ -296,8 +356,8 @@ const CommissaryInventoryPage = () => {
                         placeholder='0'
                         onChange={(event) => {
                             const value = event.target.value;
-                            if (!isNaN(value) && parseInt(value) >= 0) {
-                                setModifyQty(parseInt(value));
+                            if (!isNaN(value) && parseFloat(value) >= 0) {
+                                setModifyQty(parseFloat(value));
                                 setIsEditValid(true);
                                 setAddQtyError('');
                             } else {
@@ -416,6 +476,14 @@ const CommissaryInventoryPage = () => {
                     </Box>
                 </div>
             </Modal>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Pagination
+                count={Math.ceil(inventoryData.length / itemsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+            />
+            </Box>
         </Box>
     )
 }

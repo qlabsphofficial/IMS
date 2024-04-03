@@ -1,19 +1,17 @@
 import  { useState, useEffect } from "react";
-import { Button, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Modal,IconButton } from "@mui/material";
+import { Button, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Modal,Pagination, Select, MenuItem } from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import './styles.css';
-import {ArrowUpward, ArrowDownward} from  '@mui/icons-material'
 
 const CommissaryTransferHistoryPage = () => {
   const [startDate, setStartDate] = useState(getTodayDate());
   const [endDate, setEndDate] = useState(getTomorrowDate());
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
 
   const [transferData, setTransferData] = useState([]);
   const [modalMessage, setModalMessage] = useState('');
-  const [sortOrder, setSortOrder] = useState({
-    field: '',
-    ascending: true });
+ 
   // eslint-disable-next-line no-unused-vars
   const [modalDate, setModalDate] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -24,42 +22,25 @@ const CommissaryTransferHistoryPage = () => {
     
   });
 
-  const handleSort = (field) => {
-    let direction = 'asc';
-    if (sortOrder.field === field && sortOrder.direction === 'asc') {
-        direction = 'desc';
-    }
-    setSortOrder({ field, direction });
-  
-    const sortedData = [...transferData].sort((a, b) => {
-      let aValue, bValue;
-  
-      switch (field) {
-        case 'Category':
-          aValue = a.transacted_item.category.toLowerCase();
-          bValue = b.transacted_item.category.toLowerCase();
-          break;
-        case 'Quantity':
-          aValue = a.transacted_amount;
-          bValue = b.transacted_amount;
-          break;
-        case 'Approval Status':
-          aValue = a.approval.toLowerCase();
-          bValue = b.approval.toLowerCase();
-          break;
-        default:
-          return 0;
-      }
-  
-      if (field !== 'Quantity') {
-        return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-      }
-  
-      return direction === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-  
-    setTransferData(sortedData);
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+    filterByCategory(event.target.value);
   };
+  const categories = ['Dry Ingredients', 'Proteins', 'Baking', 'Spices', 'Sauces and Condiments','Others (packagings)'];
+
+  const filterByCategory = (category) => {
+    if (category === 'All Categories') {
+      
+      retrieveInventoryItems();
+    } else 
+    {
+      const filteredData = transferData.filter(transfer => transfer.transacted_item.category === category);
+      setDisplayedData(filteredData); // Update displayed data instead of transferData
+    }
+  };
+  
+
+  
 
   function getTodayDate() {
     const today = new Date();
@@ -78,7 +59,13 @@ const CommissaryTransferHistoryPage = () => {
   }
   
   
+  useEffect(() => {
+    retrieveInventoryItems(); // Initial data fetch
+  }, []);
   
+  async function updateTable() {
+    retrieveInventoryItems();
+  }
 
   const [isDataRequestModalVisible, setIsDataRequestModalVisible] = useState(false);
 
@@ -111,8 +98,8 @@ const CommissaryTransferHistoryPage = () => {
     }
 
     try {
-        //  const response = await fetch('http://127.0.0.1:8000/retrieve_transaction_summary', requestOptions);
-        const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
+         const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
+        //const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
         const blob = await response.blob();
 
         const url = window.URL.createObjectURL(new Blob([blob]));
@@ -135,7 +122,6 @@ const CommissaryTransferHistoryPage = () => {
 
 async function retrieveInventoryItems() {
   try {
-    // const data = await fetch('http://127.0.0.1:8000/all_transactions');
     const data = await fetch('https://ims-be-j66p.onrender.com/all_transactions');
     const response = await data.json();
   
@@ -152,6 +138,7 @@ async function retrieveInventoryItems() {
   } catch (error) {
     console.error('Error retrieving transaction data:', error);
   }
+  setCurrentPage(1)
 }
 
 
@@ -205,8 +192,8 @@ async function retrieveInventoryItems() {
       }),
     };
 
-    // const response = await fetch(`http://127.0.0.1:8000/process_transaction/${transaction_id}`, requestOptions);
     const response = await fetch(`https://ims-be-j66p.onrender.com/process_transaction/${transaction_id}`, requestOptions);
+    //const response = await fetch(`https://ims-be-j66p.onrender.com/process_transaction/${transaction_id}`, requestOptions);
     const data = await response.json();
 
     setModalDate(data.date_changed);
@@ -227,31 +214,69 @@ async function retrieveInventoryItems() {
       })
     }
 
-    // const data = await fetch('http://127.0.0.1:8000/search_transfer_requests', requestOptions);
     const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+    //const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
     const response = await data.json();
 
     setTransferData(response.transactions);
   }
 
 
+  //pagination
+  const [displayedData, setDisplayedData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); 
+  const [itemsPerPage] = useState(10); 
 
+  useEffect(() => {
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const slicedData = transferData.slice(startIndex, endIndex);
+      setDisplayedData(slicedData);
+  }, [currentPage, transferData, itemsPerPage]);    
+  
+  const handlePageChange = (event, value) => {
+      setCurrentPage(value);
+  };    
   return (
     <Box>
       <Typography variant="h5">Transfer Requests</Typography>
       <Typography variant='body1'>Listed below are all the transfer requests made within the system.</Typography>
+      
+      <div className="main" style={{ display: 'flex', justifyContent: 'space-between'}}>
+      <div >
+      <Select
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          variant="outlined"
+          size="small"
+          
+          sx={{ marginRight: '1rem', marginBottom: '1rem', marginTop:'1rem' }}
+        >
+          <MenuItem value="All Categories">All Categories</MenuItem>
+          {categories.map((category, index) => (
+            <MenuItem key={index} value={category}>{category}</MenuItem>
+          ))}
+        </Select>
 
-      <div className="main">
-        <div className="search">
-          <TextField
-            id="outlined-basic"
-            variant="outlined"
-            label="Search By Status"
-            size="small"
-            sx={{ marginTop: '7.5%', marginLeft: "84%", paddingBottom: "1rem" }}
-            onChange={(search_item) => search(search_item.target.value)}
-          />
-        </div>
+      </div>
+      <div className="search" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+        <Button
+          variant="outlined"
+          onClick={updateTable}
+          sx={{ marginRight: '1rem', marginBottom: '1rem'}}
+        >
+          Update Table
+        </Button>
+        <TextField
+          id="outlined-basic"
+          variant="outlined"
+          label="Search By Status"
+          size="small"
+          sx={{ marginRight: '1rem',marginBottom: '1rem' }}
+          onChange={(search_item) => search(search_item.target.value)}
+        />
+      </div>
+
       </div>
       <TableContainer component={Paper} id='transfers-table'>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -259,27 +284,20 @@ async function retrieveInventoryItems() {
             <TableRow id='header-row'>
               <TableCell align="center" className='table-header'>Requested Item</TableCell>
               <TableCell align="center" className='table-header'>
-      Category
-      <IconButton onClick={() => handleSort('Category')}>
-        {sortOrder.field === 'Category' && sortOrder.ascending ? <ArrowUpward /> : <ArrowDownward />}
-      </IconButton>
+              Category
+      
+    
     </TableCell>
     <TableCell align="center" className='table-header'>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        Quantity
-        <IconButton onClick={() => handleSort('Quantity')}>
-          {sortOrder.field === 'Quantity' && sortOrder.ascending ? <ArrowUpward /> : <ArrowDownward />}
-        </IconButton>
-      </div>
+            Quantity
+          </div>
     </TableCell>
               <TableCell align="center" className='table-header'>Transactor</TableCell>
               <TableCell align="center" className='table-header'>Request Date</TableCell>
               <TableCell align="center" className='table-header'>
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    Approval Status
-    <IconButton onClick={() => handleSort('Approval Status')}>
-      {sortOrder.field === 'Approval Status' && sortOrder.ascending ? <ArrowUpward /> : <ArrowDownward />}
-    </IconButton>
+              Approval Status
   </div>
 </TableCell>
               <TableCell align="center" className='table-header'>Options</TableCell>
@@ -287,7 +305,7 @@ async function retrieveInventoryItems() {
           </TableHead>
 
           <TableBody>
-            {transferData.map((transfer) => (
+            {displayedData.map((transfer) => (
               <TableRow key={transfer.id}>
                 <TableCell component="th" align="center">{transfer.transacted_item.item_name}</TableCell>
                 <TableCell component="th" align="center">{transfer.transacted_item.category}</TableCell>
@@ -316,6 +334,14 @@ async function retrieveInventoryItems() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Pagination
+                count={Math.ceil(transferData.length / itemsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+            />
+            </Box>
 
       <Dialog
         open={confirmationData.isOpen}

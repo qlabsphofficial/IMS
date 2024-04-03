@@ -1,4 +1,4 @@
-import { Button, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Modal, IconButton } from "@mui/material";
+import { Button, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Modal, IconButton, Pagination, Select, MenuItem } from "@mui/material";
 import { useState, useEffect } from "react";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CheckIcon from '@mui/icons-material/Check';
@@ -10,6 +10,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import './styles.css';
 
 const TransferHistoryPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [transferData, setTransferData] = useState([]);
@@ -33,6 +34,24 @@ const TransferHistoryPage = () => {
   const [approvalModalVisible, setApprovalModalVisible] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [approvalAction, setApprovalAction] = useState('');
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+    filterByCategory(event.target.value);
+  };
+  const categories = ['Dry Ingredients', 'Proteins', 'Baking', 'Spices', 'Sauces and Condiments','Others (packagings)'];
+
+  const filterByCategory = (category) => {
+    if (category === 'All Categories') {
+      
+      retrieveInventoryItems();
+    } else 
+    {
+      const filteredData = transferData.filter(transfer => transfer.transacted_item.category === category);
+      setDisplayedData(filteredData); // Update displayed data instead of transferData
+    }
+  };
+
 
   const showApprovalModal = (transactionId, action) => {
     setSelectedTransactionId(transactionId);
@@ -79,29 +98,45 @@ const TransferHistoryPage = () => {
   }
 
   async function retrieveInventoryItems() {
-    // const data = await fetch('http://127.0.0.1:8000/all_transactions');
     const data = await fetch('https://ims-be-j66p.onrender.com/all_transactions');
     const response = await data.json();
   
     console.log(response.transactions);
-    setTransferData(response.transactions);
-    const sortedData = response.transactions.slice().sort((a, b) => {
-      if (a.approval.toLowerCase() === 'pending' && b.approval.toLowerCase() !== 'pending') return -1;
-      if (a.approval.toLowerCase() !== 'pending' && b.approval.toLowerCase() === 'pending') return 1;
-      return 0;
+  
+    // Separate transactions by approval status
+    const pendingTransactions = [];
+    const approvedOrDeniedTransactions = [];
+  
+    response.transactions.forEach(transaction => {
+      if (transaction.approval.toLowerCase() === 'pending') {
+        pendingTransactions.push(transaction);
+      } else {
+        approvedOrDeniedTransactions.push(transaction);
+      }
     });
   
+    // Sort pending transactions by date_created in descending order
+    pendingTransactions.sort((a, b) => new Date(b.date_created) - new Date(a.date_created));
+    
+    // Sort approved and denied transactions together by date_created in descending order
+    approvedOrDeniedTransactions.sort((a, b) => new Date(b.date_created) - new Date(a.date_created));
+  
+    // Combine sorted transactions
+    const sortedData = [...pendingTransactions, ...approvedOrDeniedTransactions];
+  
     setTransferData(sortedData);
+    setCurrentPage(1);
   }
-
+  
+  
   async function deleteTransaction(transaction_id) {
     const requestOptions = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' }
     }
 
-    //  const response = await fetch(`http://127.0.0.1:8000/delete_transaction/${transaction_id}`, requestOptions);
-    const response = await fetch(`https://ims-be-j66p.onrender.com/delete_transaction/${transaction_id}`, requestOptions);
+     const response = await fetch(`https://ims-be-j66p.onrender.com/delete_transaction/${transaction_id}`, requestOptions);
+    //const response = await fetch(`https://ims-be-j66p.onrender.com/delete_transaction/${transaction_id}`, requestOptions);
     const data = await response.json();
 
     console.log(data.response);
@@ -116,8 +151,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-    //  const response = await fetch(`http://127.0.0.1:8000/update_transaction/${modId}`, requestOptions);
-    const response = await fetch(`https://ims-be-j66p.onrender.com/update_transaction/${modId}`, requestOptions);
+     const response = await fetch(`https://ims-be-j66p.onrender.com/update_transaction/${modId}`, requestOptions);
+    //const response = await fetch(`https://ims-be-j66p.onrender.com/update_transaction/${modId}`, requestOptions);
     const data = await response.json();
 
     console.log(data.response);
@@ -212,8 +247,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-    //  const data = await fetch('http://127.0.0.1:8000/search_transfer_requests', requestOptions);
-    const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+     const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+    //const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
     const response = await data.json();
 
     setTransferData(response.transactions);
@@ -228,8 +263,8 @@ const TransferHistoryPage = () => {
       })
     }
 
-    // const data = await fetch(`http://127.0.0.1:8000/substitute_approval/${transaction_id}`, requestOptions);
-    const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
+    const data = await fetch(`https://ims-be-j66p.onrender.com/substitute_approval/${transaction_id}`, requestOptions);
+    // const data = await fetch('https://ims-be-j66p.onrender.com/search_transfer_requests', requestOptions);
     const response = await data.json();
     retrieveInventoryItems();
   }
@@ -250,8 +285,8 @@ const TransferHistoryPage = () => {
     }
 
     try {
-        //  const response = await fetch('http://127.0.0.1:8000/retrieve_transaction_summary', requestOptions);
-        const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
+         const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
+        //const response = await fetch('https://ims-be-j66p.onrender.com/retrieve_transaction_summary', requestOptions);
         const blob = await response.blob();
 
         const url = window.URL.createObjectURL(new Blob([blob]));
@@ -291,23 +326,58 @@ const TransferHistoryPage = () => {
     }
   }
 
+  //pagination
+    const [displayedData, setDisplayedData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [itemsPerPage] = useState(10); 
+
+    useEffect(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const slicedData = transferData.slice(startIndex, endIndex);
+        setDisplayedData(slicedData);
+    }, [currentPage, transferData, itemsPerPage]);    
+    
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };    
+
   return (
     <Box>
       <Typography variant="h5">Transfer Requests</Typography>
       <Typography variant='body1'>Listed below are all the transfer requests made within the system.</Typography>
 
-      <div className="main">
-        <div className="search">
-          <TextField
-            id="outlined-basic"
-            variant="outlined"
-            label="Search By Status"
-            size="small"
-            sx={{ marginTop: '7.5%', marginLeft: "84%", paddingBottom: "1rem" }}
-            onChange={(search_item) => search(search_item.target.value)}
-          />
-        </div>
+      
+      <div className="main" style={{ display: 'flex', justifyContent: 'space-between'}}>
+     
+      <Select
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          variant="outlined"
+          size="small"
+          
+          sx={{ marginRight: '1rem', marginBottom: '1rem', marginTop:'1rem' }}
+        >
+          <MenuItem value="All Categories">All Categories</MenuItem>
+          {categories.map((category, index) => (
+            <MenuItem key={index} value={category}>{category}</MenuItem>
+          ))}
+        </Select>
+        <div className="search" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+        
+        <TextField
+          id="outlined-basic"
+          variant="outlined"
+          label="Search By Status"
+          size="small"
+          sx={{ marginRight: '1rem',marginBottom: '1rem' }}
+          onChange={(search_item) => search(search_item.target.value)}
+        />
       </div>
+     
+      
+      </div>
+
       <TableContainer component={Paper} id='transfers-table'>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
@@ -315,16 +385,12 @@ const TransferHistoryPage = () => {
     <TableCell align="center" className='table-header'>Requested Item</TableCell>
     <TableCell align="center" className='table-header'>
       Category
-      <IconButton onClick={() => handleSort('Category')}>
-        {sortOrder.field === 'Category' && sortOrder.ascending ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
-      </IconButton>
+      
     </TableCell>
     <TableCell align="center" className='table-header'>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         Quantity
-        <IconButton onClick={() => handleSort('Quantity')}>
-          {sortOrder.field === 'Quantity' && sortOrder.ascending ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
-        </IconButton>
+        
       </div>
     </TableCell>
     <TableCell align="center" className='table-header'>Transactor</TableCell>
@@ -344,7 +410,7 @@ const TransferHistoryPage = () => {
 
 
           <TableBody>
-            {transferData.map((transfer) => (
+            {displayedData.map((transfer) => (
               <TableRow key={transfer.id}>
                 <TableCell component="th" align="center">{transfer.transacted_item.item_name}</TableCell>
                 <TableCell align="center">{transfer.transacted_item.category}</TableCell>
@@ -378,6 +444,14 @@ const TransferHistoryPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Pagination
+                count={Math.ceil(transferData.length / itemsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+            />
+            </Box>
 
       <Modal
         open={modalVisible}
