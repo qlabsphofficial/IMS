@@ -265,7 +265,7 @@ const CafeInventoryPage = () => {
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                 <TableRow>
-                    <TableCell align="center">
+                    <TableCell align="center" className='table-header'>
                         Item Name
                     </TableCell>
                     <TableCell align="center" className='table-header'>
@@ -273,20 +273,20 @@ const CafeInventoryPage = () => {
                             Par Stock
                         </div>
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" className='table-header'>
                         Category
                 <IconButton onClick={() => handleSort('category')}>
                     {sortOrder.field === 'category' && sortOrder.ascending ? <ArrowDownward fontSize='small' /> : <ArrowUpward fontSize='small' />}
                 </IconButton>
                     </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" className='table-header'>
                         Current Stock
                 <IconButton onClick={() => handleSort('um')}>
                     {sortOrder.field === 'um' && sortOrder.ascending ? <ArrowDownward fontSize='small'/> : <ArrowUpward fontSize='small' />}
                 </IconButton>
                     </TableCell>
-                    <TableCell align="center">Request Item</TableCell>
-                    <TableCell align="center">Report Spoil</TableCell>
+                    <TableCell align="center" className='table-header'>Request Item</TableCell>
+                    <TableCell align="center" className='table-header'>Report Spoil</TableCell>
                     <TableCell align="center" className='table-header'>Options</TableCell>
                 </TableRow>
             </TableHead>

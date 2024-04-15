@@ -12,6 +12,7 @@ from django.utils import timezone
 from .serializers import ItemSerializer, TransactionSerializer, SpoiledMaterialReportSerializer, NotificationSerializer
 from datetime import datetime
 from openpyxl import Workbook
+from django.core.mail import send_mail
 
 
 # Create your views here.
@@ -90,6 +91,13 @@ def create_item(request):
         )
 
         new_item.save()
+        send_mail(
+        'New Item',
+        f'A new item is added by the Commissary: ({new_item}) ',
+        'notif.inventory@gmail.com',
+        ['inventorycafejuan@gmail.com'],
+        fail_silently=False,
+        )
         return Response({'response': 'Item Created'}, 200)
     
     else:
@@ -113,9 +121,16 @@ def update_item(request, item_id):
             commissary = User.objects.get(username='Commissary')
             notification = Notification.objects.create(
                 notif_owner=commissary,
-                text=f'The stock of {item.item_name} has reached CRITICAL status.'
+                text=f'The stock of {item.item_name} has insufficient stocks.'
             )
             notification.save()
+            send_mail(
+            'Low Stock Alert',
+            f'{item.item_name} has insufficient stocks.',
+            'notif.inventory@gmail.com',
+            ['inventorycommissary@gmail.com'],
+            fail_silently=False,
+            )
 
         return Response({'response': 'Item Updated'}, 200)
     except:
@@ -141,16 +156,23 @@ def update_cafe_item(request, item_id):
             
             cafe_notif = Notification(
                 notif_owner=cafe,
-                text=f'The stock of {item.item_name} has reached CRITICAL status.'
+                text=f'{item.item_name} has insufficient stocks.'
             )
             
             intern_notif = Notification(
                 notif_owner=intern,
-                text=f'The stock of {item.item_name} has reached CRITICAL status.'
+                text=f'{item.item_name} has insufficient stocks.'
             )
 
             cafe_notif.save()
             intern_notif.save()
+            send_mail(
+            'Low Stock Alert',
+            f'{item.item_name} has insufficient stocks.',
+            'notif.inventory@gmail.com',
+            ['inventorycafejuan@gmail.com'],
+            fail_silently=False,
+            )
 
         return Response({'response': 'Item Updated'}, 200)
     except:
@@ -225,6 +247,13 @@ def request_item(request, item_id):
             )
 
         new_transaction.save()
+        send_mail(
+            f'Request from {transactor} ',  
+            f'{transactor} has requested the transfer of {request_quantity}{requested_id.um} worth of {requested_id.item_name}',
+            'notif.inventory@gmail.com',
+            ['inventorycommissary@gmail.com'],
+            fail_silently=False,
+            )
         
         commissary = User.objects.get(username='Commissary')
         new_notification = Notification(
@@ -240,14 +269,19 @@ def request_item(request, item_id):
                 notif_owner=cafe,
                 text=f'{transactor} has requested the transfer of {request_quantity}{requested_id.um} worth of {requested_id.item_name}'
             )
-        
             cafe_notification.save()
+            send_mail(
+            'Request from Intern',  
+            f'{transactor} has requested the transfer of {request_quantity}{requested_id.um} worth of {requested_id.item_name}',
+            'notif.inventory@gmail.com',
+            ['inventorycafejuan@gmail.com'],
+            fail_silently=False,
+            )
         
         return Response({'response': 'Request Made.'}, 200)
     except:
         return Response({'response': 'Failed to Create Item Request'}, 200)
-
-
+    
 @api_view(['POST'])
 def delete_item(request, item_id):
     try:
@@ -390,9 +424,18 @@ def process_transaction(request, transaction_id):
                             
                             critical_stock_notif = Notification(
                                 notif_owner=commissary,
-                                text=f'Stock for {item.item_name} has reached CRITICAL status.'
+                                text=f'{item.item_name} has insufficient stocks.'
                             )
                             critical_stock_notif.save()
+                        
+                        # Send email to CafeJuan
+                        send_mail(
+                            'Request Approved',
+                            message,
+                            'notif.inventory@gmail.com',
+                            ['inventorycafejuan@gmail.com'],
+                            fail_silently=False,
+                        )
                     else:
                         return Response({'response': 'Request Failed. Stock Insufficient'}, 400)
                     
@@ -405,6 +448,7 @@ def process_transaction(request, transaction_id):
 
                 retrieved_transaction.save()
                 item.save()
+                
 
                 # NOTIFY INTERN
                 intern_account = User.objects.get(username='Intern')
@@ -436,7 +480,7 @@ def process_transaction(request, transaction_id):
                         
                         critical_stock_notif = Notification(
                             notif_owner=commissary,
-                            text=f'Stock for {item.item_name} has reached CRITICAL status.'
+                            text=f'{item.item_name} has insufficient stocks.'
                         )
                         critical_stock_notif.save()
                 else:
@@ -459,10 +503,20 @@ def process_transaction(request, transaction_id):
                 text=message
             )
             new_notification.save()
+
+            # Send email to CafeJuan with appropriate subject
+            subject = 'Request Approved' if action == 'Approved' else 'Request Denied'
+            send_mail(
+                subject,
+                message,
+                'notif.inventory@gmail.com',
+                ['inventorycafejuan@gmail.com'],
+                fail_silently=False,
+            )
             return Response({'response': message, 'date_changed': retrieved_transaction.date_changed }, 200)
     except:
         return Response({'response': 'Failed to Process Item Request'}, 200)
-    
+
 
 @api_view(['POST'])
 def retrieve_transaction_summary(request):
@@ -562,6 +616,13 @@ def report_spoiled(request, item_id):
 
             spoiled_item.cafe_stock -= spoil_amount
             spoiled_item.save()
+            send_mail(
+            'Spoiled Material',
+            f'{spoil_amount} of {spoiled_item.item_name} has been reported as spoiled',
+            'notif.inventory@gmail.com',
+            ['inventorycafejuan@gmail.com'],
+            fail_silently=False,
+            )
 
             if spoiled_item.cafe_stock <= spoiled_item.par_stock:
                 # Create critical notifications for Cafe and Intern entities
@@ -579,6 +640,13 @@ def report_spoiled(request, item_id):
 
                 cafe_notification.save()
                 intern_notification.save()
+                send_mail(
+                'Low Stock Alert',
+                f'The stock of {spoiled_item.item_name} has reached CRITICAL status after a spoilage report by {report_creator}.',
+                'notif.inventory@gmail.com',
+                ['inventorycafejuan@gmail.com'],
+                fail_silently=False,
+                )
 
 
             return Response({'response': 'Spoil Report Created'}, 200)
@@ -607,6 +675,13 @@ def update_item_par_stock(request, item_id):
         new_par_stock = request.data.get('par_stock')
         item.par_stock = new_par_stock
         item.save()
+        send_mail(
+                'Par Stock Level Update',
+                f'The Par Stock Level of {item.item_name} has been updated to {new_par_stock}',
+                'notif.inventory@gmail.com',
+                ['inventorycafejuan@gmail.com'],
+                fail_silently=False,
+                )
         return Response({'response': 'Par Stock Updated'})
     except Item.DoesNotExist:
         return Response({'error': 'Item not found'}, status=404)

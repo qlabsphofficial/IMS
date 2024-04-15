@@ -32,6 +32,14 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'notif.inventory@gmail.com'
+EMAIL_HOST_USER = 'notif.inventory@gmail.com'
+EMAIL_HOST_PASSWORD = 'lxih qjyf ngjb lnlf'
 
 # Application definition
 
