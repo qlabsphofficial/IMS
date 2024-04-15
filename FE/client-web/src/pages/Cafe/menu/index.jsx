@@ -160,7 +160,7 @@ const CafeInventoryPage = () => {
             })
         };
 
-        const response = await fetch(`https://ims-be-j66p.onrender.com/${requestedItem}`, requestOptions);
+        const response = await fetch(`https://ims-be-j66p.onrender.com/request_item/${requestedItem}`, requestOptions);
         const data = await response.json();
         
         if (data.response === 'Request Made.'){
