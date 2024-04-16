@@ -95,7 +95,7 @@ def create_item(request):
         'New Item',
         f'A new item is added by the Commissary: ({new_item}) ',
         'notif.inventory@gmail.com',
-        ['inventorycafejuan@gmail.com'],
+        ['mjtungul21@gmail.com'],
         fail_silently=False,
         )
         return Response({'response': 'Item Created'}, 200)
@@ -128,7 +128,7 @@ def update_item(request, item_id):
             'Low Stock Alert',
             f'{item.item_name} has insufficient stocks.',
             'notif.inventory@gmail.com',
-            ['inventorycommissary@gmail.com'],
+            ['kempay12345@gmail.com'],
             fail_silently=False,
             )
 
@@ -170,7 +170,7 @@ def update_cafe_item(request, item_id):
             'Low Stock Alert',
             f'{item.item_name} has insufficient stocks.',
             'notif.inventory@gmail.com',
-            ['inventorycafejuan@gmail.com'],
+            ['mjtungul21@gmail.com'],
             fail_silently=False,
             )
 
@@ -251,7 +251,7 @@ def request_item(request, item_id):
             f'Request from {transactor} ',  
             f'{transactor} has requested the transfer of {request_quantity}{requested_id.um} worth of {requested_id.item_name}',
             'notif.inventory@gmail.com',
-            ['inventorycommissary@gmail.com'],
+            ['inventorycommissary@gmail.com','kempay12345@gmail.com'],
             fail_silently=False,
             )
         
@@ -274,7 +274,7 @@ def request_item(request, item_id):
             'Request from Intern',  
             f'{transactor} has requested the transfer of {request_quantity}{requested_id.um} worth of {requested_id.item_name}',
             'notif.inventory@gmail.com',
-            ['inventorycafejuan@gmail.com'],
+            ['mjtungul21@gmail.com'],
             fail_silently=False,
             )
         
@@ -433,7 +433,7 @@ def process_transaction(request, transaction_id):
                             'Request Approved',
                             message,
                             'notif.inventory@gmail.com',
-                            ['inventorycafejuan@gmail.com'],
+                            ['mjtungul21@gmail.com'],
                             fail_silently=False,
                         )
                     else:
@@ -510,7 +510,7 @@ def process_transaction(request, transaction_id):
                 subject,
                 message,
                 'notif.inventory@gmail.com',
-                ['inventorycafejuan@gmail.com'],
+                ['mjtungul21@gmail.com'],
                 fail_silently=False,
             )
             return Response({'response': message, 'date_changed': retrieved_transaction.date_changed }, 200)
@@ -620,7 +620,7 @@ def report_spoiled(request, item_id):
             'Spoiled Material',
             f'{spoil_amount} of {spoiled_item.item_name} has been reported as spoiled',
             'notif.inventory@gmail.com',
-            ['inventorycafejuan@gmail.com'],
+            ['mjtungul21@gmail.com'],
             fail_silently=False,
             )
 
@@ -644,7 +644,7 @@ def report_spoiled(request, item_id):
                 'Low Stock Alert',
                 f'The stock of {spoiled_item.item_name} has reached CRITICAL status after a spoilage report by {report_creator}.',
                 'notif.inventory@gmail.com',
-                ['inventorycafejuan@gmail.com'],
+                ['mjtungul21@gmail.com'],
                 fail_silently=False,
                 )
 
@@ -679,7 +679,7 @@ def update_item_par_stock(request, item_id):
                 'Par Stock Level Update',
                 f'The Par Stock Level of {item.item_name} has been updated to {new_par_stock}',
                 'notif.inventory@gmail.com',
-                ['inventorycafejuan@gmail.com'],
+                ['mjtungul21@gmail.com'],
                 fail_silently=False,
                 )
         return Response({'response': 'Par Stock Updated'})

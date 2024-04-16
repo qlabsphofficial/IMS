@@ -22,6 +22,7 @@ import CommissaryTransferHistoryPage from './pages/Commissary/item_requests';
 import CommissaryAnalyis from './pages/Commissary/analysis';
 
 import "./App.css"
+import ContactUs from './pages/contact-us';
 
 
 const App = () => {
@@ -49,6 +50,8 @@ const App = () => {
 
           {/* LOGIN PATH */}
           <Route path="/" element={<SignIn />} />
+
+          <Route path="/contact-us" element={<ContactUs />}></Route>
         </Routes>
       </Router>
     </ThemeProvider>

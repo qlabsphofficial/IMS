@@ -17,7 +17,6 @@
 
 #sign-in-header {
     width: 80%;
-    margin-bottom: 10%;
 }
 
 .input-field {
@@ -49,6 +48,7 @@
     flex-direction: column;
     position: relative;
     color: black;
+    height: auto;
     
 }
 
